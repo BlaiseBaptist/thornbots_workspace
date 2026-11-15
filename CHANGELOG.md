@@ -10,6 +10,8 @@ a dated release section when promoting the workspace to main.
 
 ## Unreleased
 
+- Acknowledge applied RELOCALIZE fixes with PING 7 to stop remaining relay retries; flash the matching firmware before robot tests.
+
 ### High — changes what a robot does or how you deploy/operate it
 
 - **Real-robot behavior:** The target manager assigns and clears tracked targets,
