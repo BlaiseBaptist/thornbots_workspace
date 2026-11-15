@@ -8,8 +8,10 @@ and the linked package procedures before running hardware.
 ## Field starts
 
 - **T40 — sentry_localization / thornbots_pkg — unmeasured:** Survey the independent red/blue team starts
-  before the next event; defaults in `/etc/thornbots/launch.env` remain unmeasured spooky scrim values.
-  Firmware receives starts through RELOCALIZE and uses absolute field routes.
+  before the next event. `AUTO_LAUNCH_ARGS` in `/etc/thornbots/launch.env` is empty by default, so robots use
+  `auto.launch.py`'s unmeasured ARCC Season 2 start centres (red -5.25, -3.0; blue 5.25, -3.0 m).
+  Routes live on the Jetson in `thornbots_nav`'s `waypoint_nav` (`nav_route`, default `pipes`); firmware only tracks
+  the NAV_GOAL point and waits for the first RELOCALIZE.
   [Configuration](../thornbots_pkg/README.md#point_to_cv_target),
   [wire contract](../ros2_dji_serial_bridge/UART_PROTOCOL.md#message-types).
   The failed ARCC-world ingress remains software work under [T40](ROADMAP.md#short-todos).
@@ -31,8 +33,9 @@ and the linked package procedures before running hardware.
   and set latency parameters. [Stamp contract](../ros2_dji_serial_bridge/UART_PROTOCOL.md#mcb--jetson),
   [tracker timing](../thornbots_pkg/README.md#target_tracker).
 - **B-settling — thornbots_pkg — sim measured, hardware pending:** Use spin alignment gating after chase/lead/filter
-  ablations; measure real gimbal and indexing delays before hardware acceptance.
-  [Aimer](../thornbots_pkg/README.md#point_to_cv_target).
+  ablations; measure real gimbal and indexing delays before hardware acceptance. The planner (spin gating,
+  chase/lead) is firmware `aim::AimPlanner`: [MCBV3 aiming planner](../firmware/MCBV3/README.md#mcbv3-aiming-planner),
+  [TARGET_STATE](../ros2_dji_serial_bridge/UART_PROTOCOL.md#target_state-id7--tracked-enemy-armor-model).
 
 B-timing depends on the [software stamp audit](ROADMAP.md#b-hit-while-we-move); measure residual
 UART/camera delay on the robot before selecting physical latency compensation.
@@ -58,8 +61,6 @@ UART/camera delay on the robot before selecting physical latency compensation.
   [ROADMAP](ROADMAP.md#j-lidar-and-camera).
   [Moving lidar](../sentry_localization/README.md#contract-with-thornbots_pkg),
   [idle looks](../thornbots_pkg/README.md#point_to_cv_target).
-- **T19 — thornbots_pkg — untested:** Determine whether depth is needed or colour-only ranging suffices.
-  [Depth input](../thornbots_pkg/README.md#target_tracker).
 - **SENTRY-drift — robot run — open:** Angle compensation ([thornbots_pkg #18](https://github.com/Thornbots/thornbots_pkg/pull/18))
   and the RF2O scan-size guard ([rf2o #10](https://github.com/Thornbots/rf2o_laser_odometry/pull/10)) are merged; measure
   stationary drift (was 1–2 m) and moving scan acceptance under AMCL on the robot.
@@ -79,7 +80,7 @@ UART/camera delay on the robot before selecting physical latency compensation.
   clock step.
 
 - **T38 — robots — open:** All four Orins run JetPack 7.2.1/Jazzy; none has passed robot acceptance. On each: check
-  `ttyTHS1` (stop `thornbots` and disconnect the MCB before a UART loopback), the RPLIDAR (`/dev/ttyUSB0`, container udev) and the RealSense at USB 3; rebuild `yolo11s_fp16.plan`
+  `ttyTHS1` (stop `thornbots` and disconnect the MCB before a UART loopback), the RPLIDAR (`/host-dev/rplidar`, the udev symlink) and the RealSense at USB 3; rebuild `yolo11s_fp16.plan`
   (standard's built 2026-10-26); measure 60 fps camera, YOLO FPS and camera-to-`TargetState` latency in the
   [full pipeline](../realsense-yolov8-nitros-bridge/README.md#full-robot-pipeline); re-measure the Fast DDS invariants
   (Fast DDS 2.14). Standard's reflash launch hold was
@@ -111,7 +112,10 @@ UART/camera delay on the robot before selecting physical latency compensation.
 - **T23 (continued):** Observe a real referee-triggered hit turn and verify head-idle rf2o steps near the measured
   0.7 mm still-head baseline. Measure detection range and time-to-first-detection; do not enable stage 4 from sim
   alone. Depends on S2-foundation and software stages 2–4. [Design](lidar-guided-aiming-2026-10-25.md#design).
-- **MMM-field — bringup / localization / startup:** Validate physical map contract, controller hold/interlocks,
+- **MMM-field — bringup / localization / startup:** Run through `operator_workflow`, which relaunches with
+  `localization_mode:=mapping`. On a normal amcl boot, check that a controller-started MMM is refused and the MCB
+  ends in Done ([consequence](../thornbots_pkg/README.md#mcb-mapping-machine); intended, kept behavior).
+  Validate physical map contract, controller hold/interlocks,
   away-and-back AMCL convergence, live wall/scan agreement, real referee match boot/reboot, release image identity,
   persistence/reload and physical field coverage. Exercise both team starts after survey; verify raw-x displacement
   loss/slip on measured distances. Verify MCB shared-power timing, storage durability, systemd activation and actual
@@ -123,8 +127,8 @@ UART/camera delay on the robot before selecting physical latency compensation.
   odom TF at capture stamps and lit-panel depth. Measure real PING RTT and capture-to-CV latency; inspect interrupted
   MCAP integrity/replay after power loss. Rebuild per-Orin TensorRT assets before performance acceptance.
   [Unresolved capture](investigations/sentry-nightly-jetson-2026-10-18.md#remaining-acceptance).
-- **T34 / T27 (continued):** Exercise actual GPU failure/recovery, real disk-pressure bag pruning and mid-run Wi-Fi
-  without a clock step/restart. Host pruning tests (T20 merged) do not establish hardware acceptance.
+- **T34 / T27 (continued):** Exercise actual GPU failure/recovery, real disk-pressure bag pruning (it runs only at service
+  start, never mid-run) and mid-run Wi-Fi without a clock step/restart. Host pruning tests (T20 merged) do not establish hardware acceptance.
   [Startup design](../isaac-ros-startup/README.md#design-notes).
 - **E-discovery — startup / common:** After the Mini investigation, confirm attached-shell graph/topic discovery on
   the real stack with the supported DDS profile and bag comparison. Preserve Fast DDS invariants; missing CLI nodes
