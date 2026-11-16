@@ -10,9 +10,16 @@ a dated release section when promoting the workspace to main.
 
 ## Unreleased
 
-- Acknowledge applied RELOCALIZE fixes with PING 7 to stop remaining relay retries; flash the matching firmware before robot tests.
-
 ### High — changes what a robot does or how you deploy/operate it
+
+- **Real-robot behavior:** after applying a RELOCALIZE, the MCB sends PING 7 and
+  `mcb_relay` stops that fix's remaining retries; the 1 s refresh is unchanged.
+  PING carries no sequence, so a late acknowledgement can end a newer fix's
+  retries. Reflash the MCB with matching Jetson packages before robot tests
+  ([MCBV3 #145](https://github.com/Thornbots/MCBV3/pull/145),
+  [thornbots_pkg #79](https://github.com/Thornbots/thornbots_pkg/pull/79),
+  [bridge #49](https://github.com/Thornbots/ros2_dji_serial_bridge/pull/49),
+  [sim #110](https://github.com/Thornbots/sim/pull/110)).
 
 - **Real-robot behavior:** The target manager assigns and clears tracked targets,
   and the MCB replans aim continuously with a full-panel impact gate. Above
