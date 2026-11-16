@@ -21,6 +21,15 @@ a dated release section when promoting the workspace to main.
   [bridge #49](https://github.com/Thornbots/ros2_dji_serial_bridge/pull/49),
   [sim #110](https://github.com/Thornbots/sim/pull/110)).
 
+- **Real-robot behavior:** rf2o parked reference scans are on by default for
+  the sentry. Once `/odom` holds still for 2 s, rf2o matches against one anchor
+  scan per park, expiring after 7.5 s, so scan-match noise stops integrating
+  into parked drift; a shove past 2 cm drops the anchor. Enabled before the
+  physical parked test by decision on 2026-11-15, validated in sim only: the
+  T39 robot run (head idle and panning, hand shove) now confirms it
+  ([ROBOT_TESTS T39](docs/ROBOT_TESTS.md#parked-localization),
+  [sentry_localization #18](https://github.com/Thornbots/sentry_localization/pull/18)).
+
 - **Real-robot behavior:** The target manager assigns and clears tracked targets,
   and the MCB replans aim continuously with a full-panel impact gate. Above
   |yaw_rate| = π/2 rad/s it switches from panel chase to fixed crossing-line
@@ -42,10 +51,8 @@ a dated release section when promoting the workspace to main.
 - **Real-robot behavior:** rf2o recovers when the robot clock jumps backward
   by more than 1 s: it resets its scan, odometry and head-TF history and keeps
   its last pose instead of failing. Wheel fallback also recovers once buffered
-  odometry covers a scan. Parked reference scans stay off on the robot;
-  enabling them is held for the parked robot test in
-  [sentry_localization #18](https://github.com/Thornbots/sentry_localization/pull/18).
-  In sim with references on, they hold one anchor per parked head sweep,
+  odometry covers a scan. Parked reference scans are enabled on the robot by
+  the entry above. In sim with references on, they hold one anchor per parked head sweep,
   expire it after 7.5 s and drop degraded matches; long parked patrols drift
   8–13 mm instead of 56–77 mm with references off. Not yet run on a robot
   ([rf2o #18](https://github.com/Thornbots/rf2o_laser_odometry/pull/18),
