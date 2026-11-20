@@ -10,6 +10,13 @@ a dated release section when promoting the workspace to main.
 
 ## Unreleased
 
+## 2026-11-20
+
+Promoted from `nightly` 43993ac7. Validated by workspace and package CI and the
+Mac mini nightly tests; no physical robot tests ran for this release (robot
+unavailable). Robot acceptance stays open in
+[ROBOT_TESTS](docs/ROBOT_TESTS.md).
+
 ### High — changes what a robot does or how you deploy/operate it
 
 - **Real-robot behavior:** after applying a RELOCALIZE, the MCB sends PING 7 and
