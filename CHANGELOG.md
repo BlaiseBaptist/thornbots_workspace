@@ -12,7 +12,7 @@ a dated release section when promoting the workspace to main.
 
 ## 2026-11-20
 
-Promoted from `nightly` 15d18559. Validated by workspace and package CI and the
+Promoted from `nightly` a1707ef1. Validated by workspace and package CI and the
 Mac mini nightly tests; no physical robot tests ran for this release (robot
 unavailable). Robot acceptance stays open in
 [ROBOT_TESTS](docs/ROBOT_TESTS.md).
