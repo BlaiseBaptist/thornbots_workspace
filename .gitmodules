@@ -42,4 +42,11 @@
 	path = firmware/MCBV3
 	url = https://github.com/Thornbots/MCBV3.git
 	branch = main
-	update = none
+[submodule "nav_pkg"]
+	path = nav_pkg
+	url = https://github.com/Thornbots/nav_pkg.git
+	branch = main
+[submodule "robot_localization"]
+	path = robot_localization
+	url = https://github.com/Thornbots/robot_localization.git
+	branch = main

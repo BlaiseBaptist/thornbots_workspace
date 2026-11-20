@@ -4,18 +4,15 @@ The `src/` root of the Thornbots Sentry's Isaac ROS dev workspace.
 
 `main` is on ROS 2 Jazzy and Isaac ROS 4.6. The `humble` branch here and in
 every package holds the Humble tree, **frozen since 2026-09-27**: it takes no
-more work, and stays only for robots not yet reflashed to JetPack 7.2.
+more work; every robot now runs JetPack 7.2.1, so it is history only.
 A GitHub ruleset makes it read-only (no pushes or deletion, admins
-included); the repos still unlocked are listed in
-[ROADMAP T36](ROADMAP.md#short-todos).
+included).
 
-`nightly` integrates changes across the workspace and all eleven package repos.
+`nightly` integrates changes across the workspace and all thirteen package repos.
 On this branch, `.gitmodules` tracks each package's `nightly` branch while
 keeping exact commit pins. [CHANGELOG.md](CHANGELOG.md) records unreleased
 changes to carry into `main`; update it when adding work to nightly.
 
-[Nightly validation, 2026-10-06](docs/testing/nightly-2026-10-06.md) records
-the tested revisions, results, coverage limits, and commands to reproduce them.
 ## Working with submodules
 
 Each package is a submodule:
@@ -24,17 +21,27 @@ Each package is a submodule:
 git clone --recurse-submodules https://github.com/Thornbots/thornbots_workspace.git src
 ```
 
-That leaves every submodule on a detached HEAD. Put each back on its branch before committing:
+That checks out the exact commits this repo pins, each on a detached HEAD.
+Build from that state to reproduce the workspace. To change a package, start a
+branch where it stands, then rebase onto the package's `nightly` only when you
+mean to take newer work:
 
 ```sh
-git submodule foreach --recursive \
-  'git checkout $(git config -f $toplevel/.gitmodules submodule.$name.branch)'
+cd thornbots_pkg
+git switch -c my-change
+git fetch origin && git rebase origin/nightly   # optional: move to the branch tip
 ```
+
+Do not run `git checkout nightly` in every submodule: it jumps each package to
+its branch tip, which can differ from the pinned commit, and nested
+submodules have no configured branch.
 
 A package change takes two commits: one in the package, one here to bump the gitlink. `Dockerfile.thornbots` builds from this directory, so your image picks up the change without the bump. Skip it and everyone else builds the old code, and your next `git submodule update` rewinds the package.
 
 [CI and validation](docs/CI.md) covers repository checks, lint debt, and
-robot images. PRs into `nightly` or `main` run CI; pushes to either branch
+robot images. Only `main` runs CI and builds images (`nightly` is covered by
+[local checks](docs/CI.md#local-checks-for-prs-into-nightly) and the
+[nightly tests](docs/CI.md#nightly-tests)); pushes to `main`
 publish tested images to `ghcr.io/thornbots/isaac-ros`, using exact gitlinks.
 
 One logical change, one bump: a bump may move several gitlinks when they belong
@@ -51,26 +58,30 @@ this repo's branch bumping the gitlinks. Follow the
 | `thornbots_pkg` | `nightly` | Hardware interface, URDF, CV target selection, `auto.launch.py` |
 | `sentry_localization` | `nightly` | SLAM / AMCL / EKF backends |
 | `sim` | `nightly` | gz-sim worlds and the localization test suite |
+| `nav_pkg` | `nightly` | Waypoint navigation (`thornbots_nav`) |
 | `realsense-yolov8-nitros-bridge` | `nightly` | YOLOv8 detection on the RealSense stream |
 | `Realsense_ROI_Depth_Rectifier` | `nightly` | Depth rectification for detection ROIs |
 | `ros2_dji_serial_bridge` | `nightly` | Serial link to the DJI Type-C board |
 | `sllidar_ros2` | `nightly` | RPLIDAR driver (fork) |
 | `rf2o_laser_odometry` | `nightly` | Scan-matched odometry (fork) |
+| `robot_localization` | `nightly` | EKF used by `sentry_localization` (fork of 3.8.3; only the simulation uses its added options) |
 | `isaac_ros_common` | `nightly` | Isaac ROS base, our Dockerfiles and container scripts |
 | `isaac-ros-startup` | `nightly` | systemd service that starts the robot stack at boot |
-| `firmware/MCBV3` | `nightly` | MCB firmware, opt-in: not cloned by default, see below |
+| `firmware/MCBV3` | `nightly` | MCB firmware for native UART and simulation tests, see below |
 
-Start with [ROADMAP.md](ROADMAP.md) for open work and links to its plans,
-[JAZZY_FLASH.md](JAZZY_FLASH.md) for migration status, robot checks and reflashing.
-[ARCC_2026_SENTRY_CONTEXT.md](ARCC_2026_SENTRY_CONTEXT.md) covers competition
+Start with [ROADMAP](docs/ROADMAP.md) for unfinished Mini/software/sim work and
+[ROBOT_TESTS](docs/ROBOT_TESTS.md) for physical-robot acceptance.
+The [ARCC rules context](docs/ARCC_2026_SENTRY_CONTEXT.md) covers competition
 rules and hardware context. The [documentation ownership map](AGENTS.md#documentation)
 identifies where shared information belongs; link there instead of copying it.
 
 ### MCB firmware
 
-`firmware/MCBV3` is the MCB team's repo, so a wire change and its firmware half can be checked together. It's `update = none` in `.gitmodules`: `clone --recurse-submodules` and `submodule update --init` skip it, so the robots never fetch it. `firmware/COLCON_IGNORE` and `.dockerignore` keep it out of colcon and the image. To get it, with its own taproot submodules:
+`firmware/MCBV3` is a standard workspace submodule, so a wire change and its firmware half can be checked together. `clone --recurse-submodules` and `submodule update --init --recursive` fetch it with its taproot submodules like any other package. Workspace CI and nightly tests build its hosted firmware for native UART and simulation tests. `firmware/COLCON_IGNORE` and `.dockerignore` keep firmware sources out of colcon and the ROS image.
+
+If an existing checkout used the former firmware opt-out, remove that local setting before updating:
 
 ```sh
-git submodule update --init --checkout firmware/MCBV3
-git -C firmware/MCBV3 submodule update --init --recursive
+git config --unset-all submodule.firmware/MCBV3.update
+git submodule update --init --recursive
 ```

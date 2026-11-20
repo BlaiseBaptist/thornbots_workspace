@@ -18,9 +18,12 @@
 # Dockerfile.thornbots), so it has no business in the context either.
 sim/
 
+# Use the ROS apt package on robots, not the simulation fork.
+robot_localization/
+
 # isaac_ros_common ships the Dockerfiles and configs; only docker/ is COPYed.
 isaac_ros_common/*
 !isaac_ros_common/docker/
 
-# MCB firmware (opt-in submodule, see README.md "MCB firmware"); never in the image.
+# MCB firmware (optional submodule, see README.md "MCB firmware"); never in the image.
 firmware/

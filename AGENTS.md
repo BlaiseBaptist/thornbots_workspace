@@ -1,15 +1,9 @@
 # isaac_ros-dev workspace
 
 Call out code that doesn't follow standard practice. CV detection/tracking
-comes first; [game context](ARCC_2026_SENTRY_CONTEXT.md) defines the field.
+comes first; [game context](docs/ARCC_2026_SENTRY_CONTEXT.md) defines the field.
 Use terse bullets for status/checklists; give rationale when asked.
 Memory is disabled: do not read or write agent memory.
-
-## Delegation
-
-Delegate well-specified, high-volume repetitive edits to lower-cost agents
-(Haiku/Luna). The delegating agent defines scope and acceptance checks,
-resolves ambiguity, then reviews the diff and runs the checks itself.
 
 ## Repository checks
 
@@ -26,13 +20,22 @@ CI check commits and message contracts;
 Load [isaac-ros-docker](.claude/skills/isaac-ros-docker/SKILL.md) for every
 Docker command or command inside a container.
 
-- Ask before starting, restarting or stopping any laptop container or VM,
-  including through scripts/services or Colima. On `ts-nano-*`, carry out
-  requested container/image lifecycle work without separate confirmation.
+- Each agent task creates its own container with
+  [`agent_container.sh`](.claude/skills/isaac-ros-docker/SKILL.md#your-own-container)
+  and removes it when done, even on failure. The script enforces unique
+  ROS domain, gz partition, worktree mount and volumes; never stop, restart or
+  remove a container you did not create (notably `isaac_ros_jazzy_container`).
+  Start VMs (including Colima) as needed without asking. On `ts-nano-*`, carry
+  out requested container/image lifecycle work without separate confirmation.
   “dev” means `ts-nano-dev`.
-- Ask before every sim integration test or bench run, even an obvious rerun.
-- Check for running stacks before launching; ask before stopping anything you
-  did not start, and clean up what you started.
+- Run tests as you see fit, including sim integration tests, sim benches and
+  reruns, without asking. Restart a robot's `thornbots` stack without asking;
+  ask before other runs on a physical robot.
+- Keep the Mac mini free: its Colima runs only while an agent container does;
+  the script stops it when none is left. Never leave either idle; report
+  what you stopped.
+- A delegation brief stating the user approved named actions is that approval
+  for the delegated agent, only for what it names.
 
 ## Branches
 
@@ -43,14 +46,15 @@ Docker command or command inside a container.
 ## Packages
 
 - Read the package's `AGENTS.md` before editing. `CLAUDE.md` stays `@AGENTS.md`.
-- Commit with the existing Git identity and signing key tied to your GitHub
-  account. Do not rewrite identity config, disable signing or bypass hooks.
+- Commit with the existing Git identity tied to your GitHub account. Do not
+  rewrite identity config or bypass hooks.
 - Commit and push each tested logical change without being asked: package
   first, then one workspace gitlink bump per logical change. Never point at an
   unpushed commit.
 - Keep [CHANGELOG](CHANGELOG.md) Unreleased current: each workspace change
   that alters behavior, interfaces or contributor workflow adds or updates
-  its entry in the same PR.
+  its entry in the same PR, under the High/Medium/Low level defined in the
+  [CHANGELOG intro](CHANGELOG.md).
 - Stage explicit superproject paths; never `git commit -a`. Inspect
   `git diff --cached --stat`; only deliberately chosen gitlinks may move.
   Stale checkouts must not revert someone else's gitlink updates.
@@ -72,9 +76,10 @@ or dated investigations linked to current status.
 | --- | --- |
 | Usage and design | Owning package's `README.md` |
 | Robot launch | [YOLO README](realsense-yolov8-nitros-bridge/README.md#full-robot-pipeline) |
+| Field mapping (MMM) | [thornbots_pkg](thornbots_pkg/README.md#mcb-mapping-machine); operator steps in the [Notion mapping doc](https://app.notion.com/p/fff357611caa4131b216742bb7c6e048) |
 | Node/topic diagram | [thornbots_pkg](thornbots_pkg/README.md#nodes) |
-| Hardware/migration status | [JAZZY_FLASH](JAZZY_FLASH.md#hardware-status) |
-| Open work | [ROADMAP](ROADMAP.md) |
+| Mini/software/sim work | [ROADMAP](docs/ROADMAP.md) |
+| Physical robot validation | [ROBOT_TESTS](docs/ROBOT_TESTS.md) |
 | Wire/timestamp contract | [UART_PROTOCOL](ros2_dji_serial_bridge/UART_PROTOCOL.md) |
 | Defaults/message fields | Source declarations |
 
@@ -83,8 +88,9 @@ or dated investigations linked to current status.
 Follow [REP 103](https://github.com/ros-infrastructure/rep/blob/master/rep-0103.rst)
 units/axes and [REP 105](https://github.com/ros-infrastructure/rep/blob/master/rep-0105.rst)
 frame roles. Document only choices and deviations at their owner: the
-heading-fixed `root` base ([pose_translator](thornbots_pkg/README.md#pose_translator))
-and the field-centred [wire frame](ros2_dji_serial_bridge/UART_PROTOCOL.md#message-types).
+heading-fixed `root` base, the translation-only `nav_odom->odom` correction
+([pose_translator and odometry](thornbots_pkg/README.md#pose_translator)), and the
+field-centred [wire frame](ros2_dji_serial_bridge/UART_PROTOCOL.md#message-types).
 
 ## Wire compatibility
 
