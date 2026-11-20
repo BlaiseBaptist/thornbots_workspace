@@ -12,7 +12,7 @@ a dated release section when promoting the workspace to main.
 
 ## 2026-11-20
 
-Promoted from `nightly` 43993ac7. Validated by workspace and package CI and the
+Promoted from `nightly` 15d18559. Validated by workspace and package CI and the
 Mac mini nightly tests; no physical robot tests ran for this release (robot
 unavailable). Robot acceptance stays open in
 [ROBOT_TESTS](docs/ROBOT_TESTS.md).
@@ -844,6 +844,12 @@ unavailable). Robot acceptance stays open in
   passed at that revision; parked hit-path repeatability remained unresolved.
 
 ### Low — internal: sim harness, CI, tests, docs, tooling
+
+- The robot image holds TensorRT at 10.16.2.10 (cuda13.2): NVIDIA's repo now
+  also serves 11.4, which broke `ros-jazzy-isaac-ros-tensor-rt` resolution.
+  nav_pkg CI pins workspace tooling that lists it
+  ([isaac_ros_common #27](https://github.com/Thornbots/isaac_ros_common/pull/27),
+  [nav_pkg #7](https://github.com/Thornbots/nav_pkg/pull/7)).
 
 - The sim's emulated sentry pitch encoder zero now matches the firmware's `PITCH_OFFSET` (-0.26, was a stale
   -0.09), and a sim test fails if they diverge. Sim only; no real-robot behavior change
