@@ -840,9 +840,12 @@ a dated release section when promoting the workspace to main.
 
 - The robot image holds TensorRT at 10.16.2.10 (cuda13.2): NVIDIA's repo now
   also serves 11.4, which broke `ros-jazzy-isaac-ros-tensor-rt` resolution.
-  nav_pkg CI pins workspace tooling that lists it
+  nav_pkg CI pins workspace tooling that lists it, and sim/thornbots_pkg CI
+  build against a dependency workspace with the current bridge messages
   ([isaac_ros_common #27](https://github.com/Thornbots/isaac_ros_common/pull/27),
-  [nav_pkg #7](https://github.com/Thornbots/nav_pkg/pull/7)).
+  [nav_pkg #7](https://github.com/Thornbots/nav_pkg/pull/7),
+  [sim #112](https://github.com/Thornbots/sim/pull/112),
+  [thornbots_pkg #81](https://github.com/Thornbots/thornbots_pkg/pull/81)).
 
 - The sim's emulated sentry pitch encoder zero now matches the firmware's `PITCH_OFFSET` (-0.26, was a stale
   -0.09), and a sim test fails if they diverge. Sim only; no real-robot behavior change
