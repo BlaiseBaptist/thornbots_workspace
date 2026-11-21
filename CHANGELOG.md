@@ -839,6 +839,7 @@ a dated release section when promoting the workspace to main.
 ### Low — internal: sim harness, CI, tests, docs, tooling
 
 - Refresh package ROS CI workspace pins to current nightly ([ROI #16](https://github.com/Thornbots/Realsense_ROI_Depth_Rectifier/pull/16), [rf2o #32](https://github.com/Thornbots/rf2o_laser_odometry/pull/32), [bridge #51](https://github.com/Thornbots/ros2_dji_serial_bridge/pull/51), [localization #52](https://github.com/Thornbots/sentry_localization/pull/52), [lidar #17](https://github.com/Thornbots/sllidar_ros2/pull/17), [nav #8](https://github.com/Thornbots/nav_pkg/pull/8)).
+- Update the quality-check Python dependencies; all workspace repositories retain their existing lint baselines.
 
 - The robot image holds TensorRT at 10.16.2.10 (cuda13.2): NVIDIA's repo now
   also serves 11.4, which broke `ros-jazzy-isaac-ros-tensor-rt` resolution.
