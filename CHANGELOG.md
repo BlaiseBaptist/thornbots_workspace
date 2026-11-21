@@ -838,6 +838,8 @@ a dated release section when promoting the workspace to main.
 
 ### Low — internal: sim harness, CI, tests, docs, tooling
 
+- Update the quality-check Python dependencies; all workspace repositories retain their existing lint baselines.
+
 - The robot image holds TensorRT at 10.16.2.10 (cuda13.2): NVIDIA's repo now
   also serves 11.4, which broke `ros-jazzy-isaac-ros-tensor-rt` resolution.
   nav_pkg CI pins workspace tooling that lists it, and sim/thornbots_pkg CI
